@@ -1,8 +1,12 @@
 ## This Repo is still under construction
-### Missing:
-1. Set up shared file system
-2. Detailed setup for Internet
-3. GPU support
+
+
+### Known Issue and TODO:
+1. Install Anaconda and make it avaiable to all users
+2. Set up shared file system
+3. Now, when execute srun, the user name is shown as I don't have a username!, which apparently should be fixed.
+
+
 # Slurm-ubuntu20
 This repo is for setting up [SLURM](https://github.com/SchedMD/slurm) with GPU nodes on Ubuntu 20.04. This is tested on a cluster with 3 GPU nodes and 1 controller.
 
@@ -127,6 +131,7 @@ Now we copy our slurm config files (slurm.conf and slurmdbd.conf), slurmctld ser
 sudo cp /storage/Slurm-ubuntu20/slurmdbd.conf /etc/slurm-llnl/
 sudo cp /storage/Slurm-ubuntu20/slurm.conf /etc/slurm-llnl/
 sudo cp /storage/Slurm-ubuntu20/cgroup.conf /etc/slurm-llnl
+sudo cp /storage/Slurm-ubuntu20/cgroup_allowed_devices_file.conf /etc/slurm-llnl
 sudo cp /storage/Slurm-ubuntu20/gres.conf /etc/slurm-llnl
 sudo cp /storage/Slurm-ubuntu20/epilog.sh /etc/slurm-llnl
 sudo cp /storage/Slurm-ubuntu20/prolog.sh /etc/slurm-llnl
@@ -165,6 +170,7 @@ Then we will copy all the config files we need from the controller to the worker
 sudo cp /storage/Slurm-ubuntu20/slurmdbd.conf /etc/slurm-llnl/
 sudo cp /storage/Slurm-ubuntu20/slurm.conf /etc/slurm-llnl/
 sudo cp /storage/Slurm-ubuntu20/cgroup.conf /etc/slurm-llnl
+sudo cp /storage/Slurm-ubuntu20/cgroup_allowed_devices_file.conf /etc/slurm-llnl
 sudo cp /storage/Slurm-ubuntu20/gres.conf /etc/slurm-llnl
 sudo cp /storage/Slurm-ubuntu20/epilog.sh /etc/slurm-llnl
 sudo cp /storage/Slurm-ubuntu20/prolog.sh /etc/slurm-llnl
