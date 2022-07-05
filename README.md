@@ -8,11 +8,32 @@
 
 
 # Slurm-ubuntu20
-This repo is for setting up [SLURM](https://github.com/SchedMD/slurm) with GPU nodes on Ubuntu 20.04. This is tested on a cluster with 3 GPU nodes and 1 controller.
+This repo is for setting up [SLURM](https://github.com/SchedMD/slurm) with GPU nodes on Ubuntu 20.04. This is tested on a cluster with 2 GPU nodes and 1 controller.
 
 OS: Ubuntu 20.04 LTS
-
+## Table of Content
+- [Slurm-ubuntu20](#slurm-ubuntu20)
+  - [Table of Content](#table-of-content)
+  - [References](#references)
+  - [Guide](#guide)
+    - [Sync Time](#sync-time)
+    - [Setup munge and slurm user](#setup-munge-and-slurm-user)
+    - [Sync GUI and UIDs](#sync-gui-and-uids)
+    - [Create shared storage](#create-shared-storage)
+    - [Install Munge](#install-munge)
+      - [Install Munge on Controller Node](#install-munge-on-controller-node)
+      - [Install Munge on Worker Node](#install-munge-on-worker-node)
+    - [Install Slurm](#install-slurm)
+      - [Install Slurm on Controller Node](#install-slurm-on-controller-node)
+      - [Set up Inernet Configuration](#set-up-inernet-configuration)
+      - [Install Slurm on Worker Node](#install-slurm-on-worker-node)
+  - [Troubleshooting](#troubleshooting)
+    - [Internet Permission](#internet-permission)
+    - [Can't find the PIDFile](#cant-find-the-pidfile)
+    - [How to Debug](#how-to-debug)
+  
 ## References
+
 This repo is based two main resources:
 1. [slurm_gpu_ubuntu](https://github.com/nateGeorge/slurm_gpu_ubuntu) by NateGeorge
 2. [ubuntu-slurm](https://github.com/mknoxnv/ubuntu-slurm) by mknoxnv
@@ -20,15 +41,6 @@ This repo is based two main resources:
 
 ## Guide
 I assume that you have installed Ubuntu 20.04 LTS. Before, we start to install slurm, I would recommend to run sudo apt-get update and apt-get upgrade, then execute a rebooting, to avoid underlying errors casued by some out-of-date packages. After you have upgraded all your packages, we can now start to install slurm.
-
-<!-- ### Outline
-1. Sync Time
-2. Setup munge and slurm user
-3. Sync GUI and UIDs
-4. Create shared storage
-5. Install Munge
-6. Install Slurm
-7. Configure Slurm -->
 
 ### Sync Time
 
@@ -72,7 +84,8 @@ sudo systemctl start munge
 ```
 Execute ``munge -n | unmunge | grep STATUS``, this should still return ``Success(0)``. You can also test your installation by connection to the controller node by ``munge -n | ssh CONTROLLER_HOST unmunge`` (Replace the CONTROLLER_HOST to your hostname)
 
-### Install Slurmdbd on Controller Node
+### Install Slurm
+#### Install Slurm on Controller Node
 ```
 sudo apt-get install git gcc make ruby ruby-dev libpam0g-dev libmariadb-client-lgpl-dev libmysqlclient-dev mariadb-server build-essential libssl-dev -y
 sudo gem install fpm
@@ -154,7 +167,20 @@ sudo systemctl enable slurmctld
 sudo systemctl start slurmctld
 ```
 
-In our case, the slurm controller won't work as a worker node, but if it's requested, please refer to NateGreoge's setup
+In our case, the slurm controller won't be expected to work as a worker node, but if it's requested, please refer to NateGeroge's setup
+
+#### Set up Inernet Configuration
+Slurm controller listens the messages from worker nodes on port 6817, if you use my config. Therefore, we will open the port for the workers by:
+```
+ufw allow from worker1_id_addr to any port any 6817
+ufw allow from worker2_id_addr to any port any 6817
+```
+
+srun will use random port, therefore, it's better to set up a range for it, which is done in the config file by setting ``SrunPortRange=30000-50000`` in the slurm.conf file. Of course, you can also change it based on your system. But be careful that you will change it also on all worker nodes. Now, we will also open the ports on the controller node by adding these rules to your firewall.
+```
+ufw allow from worker1_id_addr to any port any 30000:50000 proto tcp
+ufw allow from worker2_id_addr to any port any 30000:50000 proto tcp
+```
 
 #### Install Slurm on Worker Node
 First let's create the directories we will need:
@@ -207,8 +233,8 @@ ufw allow from worker2_id_addr to any port any 6817
 
 srun will use random port, therefore, it's better to set up a range for it, which is done in the config file. We will also open the ports on the controller node by adding these rules to your firewall.
 ```
-ufw allow from worker1_id_addr to any port any 30000:50000
-ufw allow from worker2_id_addr to any port any 30000:50000
+ufw allow from worker1_id_addr to any port any 30000:50000 proto tcp
+ufw allow from worker2_id_addr to any port any 30000:50000 proto tcp
 ```
 
 ### Can't find the PIDFile
