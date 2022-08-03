@@ -155,7 +155,7 @@ sudo cp /storage/Slurm-ubuntu20/slurmctld.service /etc/systemd/system/
 Then, we change the owner of the directories and files to slurm user
 ```
 sudo chown -R slurm:slurm /var/spool/slurm-llnl/ctld /var/spool/slurm-llnl/d /var/log/slurm-llnl /var/spool/slurm-llnl
-chmod -R 751 /var/log/slurm-llnl
+chmod -R 755 /var/log/slurm-llnl
 ```
 
 Now we will start all slurm services:
@@ -205,7 +205,7 @@ sudo cp /storage/Slurm-ubuntu20/prolog.sh /etc/slurm-llnl
 Then we change the owner and set the permissions by:
 ```
 chown -R slurm:slurm /var/spool/slurm-llnl /etc/slurm-llnl /var/log/slurm-llnl
-chmod -R 751 /var/log/slurm-llnl /etc/slurm-llnl /var/spool/slurm-llnl
+chmod -R 755 /var/log/slurm-llnl /etc/slurm-llnl /var/spool/slurm-llnl
 ```
 
 Now we can start the slurmd service on the worker node:
@@ -227,14 +227,16 @@ sudo sacctmgr add cluster YourClusterName
 ### Internet Permission
 Slurm controller listens the messages from worker nodes on port 6817, if you use my config. Therefore, we will open the port for the workers by:
 ```
-ufw allow from worker1_id_addr to any port any 6817
-ufw allow from worker2_id_addr to any port any 6817
+ufw allow from worker1_id_addr to any port 2049
+ufw allow from worker2_id_addr to any port 2049
+ufw allow from worker1_id_addr to any port 6817
+ufw allow from worker2_id_addr to any port 6817
 ```
 
 srun will use random port, therefore, it's better to set up a range for it, which is done in the config file. We will also open the ports on the controller node by adding these rules to your firewall.
 ```
-ufw allow from worker1_id_addr to any port any 30000:50000 proto tcp
-ufw allow from worker2_id_addr to any port any 30000:50000 proto tcp
+ufw allow from worker1_id_addr to any port 30000:50000 proto tcp
+ufw allow from worker2_id_addr to any port 30000:50000 proto tcp
 ```
 
 ### Can't find the PIDFile
